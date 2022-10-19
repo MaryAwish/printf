@@ -18,6 +18,7 @@ char *convert(unsigned long int num, int base, int lowercase)
 		? "0123456789abcdef"
 		: "0123456789ABCDEF";
 	ptr = &buff[49];
+
 	*ptr = '\0';
 
 	do {
