@@ -19,6 +19,7 @@ int _putchar(char c)
 		write(1, &buf, i);
 		i = 0;
 	}
+
 	if (c != -1)
 	{
 		buf[i] = c;
