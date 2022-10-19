@@ -19,6 +19,7 @@ int print_int(va_list l, flags_t *f)
 	if (n <= 0)
 		res++;
 	print_number(n);
+
 	return (res);
 }
 
