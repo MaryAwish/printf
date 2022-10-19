@@ -40,6 +40,7 @@ int _printf(const char *format, ...)
 		else
 			count += _putchar(*p);
 	}
+
 	_putchar(-1);
 	va_end(args);
 	return (count);
