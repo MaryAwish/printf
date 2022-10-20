@@ -1,10 +1,9 @@
 /*
  * File: memory_handlers.c
- * Auth: Mary Ouma
- *       Jan Nelson
+ * Auth: Brennan D Baraban
  */
 
-#include "main.h"
+#include "holberton.h"
 
 unsigned int _memcpy(buffer_t *output, const char *src, unsigned int n);
 void free_buffer(buffer_t *output);
