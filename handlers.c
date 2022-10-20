@@ -6,14 +6,22 @@
 
 #include "main.h"
 
+unsigned char handle_flags(const char *flag, char *index);
+unsigned char handle_length(const char *modifier, char *index);
+int handle_width(va_list args, const char *modifier, char *index);
+int handle_precision(va_list args, const char *modifier, char *index);
+unsigned int (*handle_specifiers(const char *specifier))(va_list, buffer_t *,
+		unsigned char, int, int, unsigned char);
+
 /**
- * handle_flags - Matches a flag with its corresponding value.
- * @flag: A pointer to the potential flag.
+ * handle_flags - Matches flags with corresponding values.
+ * @flag: A pointer to a potential string of flags.
+ * @index: An index counter for the original format string.
  *
- * Return: If a flag character is matched - its corresponding value.
+ * Return: If flag characters are matched - a corresponding value.
  *         Otherwise - 0.
  */
-unsigned char handle_flags(const char *flag)
+unsigned char handle_flags(const char *flag, char *index)
 {
 	int i, j;
 	unsigned char ret = 0;
@@ -32,6 +40,7 @@ unsigned char handle_flags(const char *flag)
 		{
 			if (flag[i] == flags[j].flag)
 			{
+				(*index)++;
 				if (ret == 0)
 					ret = flags[j].value;
 				else
@@ -49,16 +58,25 @@ unsigned char handle_flags(const char *flag)
 /**
  * handle_length - Matches length modifiers with their corresponding value.
  * @modifier: A pointer to a potential length modifier.
+ * @index: An index counter for the original format string.
  *
  * Return: If a lenth modifier is matched - its corresponding value.
  *         Otherwise - 0.
  */
-unsigned char handle_length(const char *modifier)
+unsigned char handle_length(const char *modifier, char *index)
 {
 	if (*modifier == 'h')
+	{
+		(*index)++;
 		return (SHORT);
+	}
+
 	else if (*modifier == 'l')
+	{
+		(*index)++;
 		return (LONG);
+	}
+
 	return (0);
 }
 
@@ -66,16 +84,16 @@ unsigned char handle_length(const char *modifier)
  * handle_width - Matches a width modifier with its corresponding value.
  * @args: A va_list of arguments.
  * @modifier: A pointer to a potential width modifier.
- * @index: An index counter of the original format string.
+ * @index: An index counter for the original format string.
  *
  * Return: If a width modifier is matched - its value.
  *         Otherwise - 0.
  */
-char handle_width(va_list args, const char *modifier, char *index)
+int handle_width(va_list args, const char *modifier, char *index)
 {
-	char value = 0;
+	int value = 0;
 
-	while ((*modifier > '0' && *modifier <= '9') || (*modifier == '*'))
+	while ((*modifier >= '0' && *modifier <= '9') || (*modifier == '*'))
 	{
 		(*index)++;
 
@@ -100,15 +118,15 @@ char handle_width(va_list args, const char *modifier, char *index)
  *                    its corresponding value.
  * @args: A va_list of arguments.
  * @modifier: A pointer to a potential precision modifier.
- * @index: An index counter of the original format string.
+ * @index: An index counter for the original format string.
  *
- * Return: If a precision modifier is matched - its vaue.
+ * Return: If a precision modifier is matched - its value.
  *         If the precision modifier is empty, zero, or negative - 0.
  *         Otherwise - -1.
  */
-char handle_precision(va_list args, const char *modifier, char *index)
+int handle_precision(va_list args, const char *modifier, char *index)
 {
-	char value = 0;
+	int value = 0;
 
 	if (*modifier != '.')
 		return (-1);
@@ -124,7 +142,7 @@ char handle_precision(va_list args, const char *modifier, char *index)
 		return (0);
 	}
 
-	while ((*modifier > '0' && *modifier <= '9') ||
+	while ((*modifier >= '0' && *modifier <= '9') ||
 	       (*modifier == '*'))
 	{
 		(*index)++;
@@ -153,8 +171,8 @@ char handle_precision(va_list args, const char *modifier, char *index)
  * Return: If a conversion function is matched - a pointer to the function.
  *         Otherwise - NULL.
  */
-unsigned int (*handle_specifiers(const char *specifier))(va_list, buffer_t *,\
-		unsigned char, char, char, unsigned char)
+unsigned int (*handle_specifiers(const char *specifier))(va_list, buffer_t *,
+		unsigned char, int, int, unsigned char)
 {
 	int i;
 	converter_t converters[] = {

@@ -1,5 +1,5 @@
 /*
- * File: base_converters.c
+ * File: base_converter.c
  * Auth: Mary Ouma
  *       Jan Nelson
  */
@@ -7,14 +7,14 @@
 #include "main.h"
 
 unsigned int convert_sbase(buffer_t *output, long int num, char *base,
-		unsigned char flags, char wid, char prec);
+		unsigned char flags, int wid, int prec);
 unsigned int convert_ubase(buffer_t *output,
 		unsigned long int num, char *base,
-		unsigned char flags, char wid, char prec);
+		unsigned char flags, int wid, int prec);
 
 /**
  * convert_sbase - Converts a signed long to an inputted base and stores
- *                the result to a buffer contained in a struct.
+ *                 the result to a buffer contained in a struct.
  * @output: A buffer_t struct containing a character array.
  * @num: A signed long to be converted.
  * @base: A pointer to a string containing the base to convert to.
@@ -25,7 +25,7 @@ unsigned int convert_ubase(buffer_t *output,
  * Return: The number of bytes stored to the buffer.
  */
 unsigned int convert_sbase(buffer_t *output, long int num, char *base,
-		unsigned char flags, char wid, char prec)
+		unsigned char flags, int wid, int prec)
 {
 	int size;
 	char digit, pad = '0';
@@ -40,10 +40,10 @@ unsigned int convert_sbase(buffer_t *output, long int num, char *base,
 
 	else
 	{
-		for (; prec > 1; prec--, wid--)
+		for (; prec > 1; prec--, wid--) /* Handle precision */
 			ret += _memcpy(output, &pad, 1);
 
-		if (NEG_FLAG == 0)
+		if (NEG_FLAG == 0) /* Handle width */
 		{
 			pad = (ZERO_FLAG == 1) ? '0' : ' ';
 			for (; wid > 1; wid--)
@@ -70,7 +70,7 @@ unsigned int convert_sbase(buffer_t *output, long int num, char *base,
  * Return: The number of bytes stored to the buffer.
  */
 unsigned int convert_ubase(buffer_t *output, unsigned long int num, char *base,
-		unsigned char flags, char wid, char prec)
+		unsigned char flags, int wid, int prec)
 {
 	unsigned int size, ret = 1;
 	char digit, pad = '0', *lead = "0x";
@@ -84,21 +84,21 @@ unsigned int convert_ubase(buffer_t *output, unsigned long int num, char *base,
 
 	else
 	{
-		if (((flags >> 5) & 1) == 1)
+		if (((flags >> 5) & 1) == 1) /* Printing a ptr address */
 		{
 			wid -= 2;
 			prec -= 2;
 		}
-		for (; prec > 1; prec--, wid--)
+		for (; prec > 1; prec--, wid--) /* Handle precision */
 			ret += _memcpy(output, &pad, 1);
 
-		if (NEG_FLAG == 0)
+		if (NEG_FLAG == 0) /* Handle width */
 		{
 			pad = (ZERO_FLAG == 1) ? '0' : ' ';
 			for (; wid > 1; wid--)
 				ret += _memcpy(output, &pad, 1);
 		}
-		if (((flags >> 5) & 1) == 1)
+		if (((flags >> 5) & 1) == 1) /* Print 0x for ptr address */
 			ret += _memcpy(output, lead, 2);
 	}
 

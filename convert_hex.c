@@ -1,5 +1,5 @@
 /*
- * File: convert_nums_1.c
+ * File: convert_hex.c
  * Auth: Mary Ouma
  *       Jan Nelson
  */
@@ -7,9 +7,9 @@
 #include "main.h"
 
 unsigned int convert_x(va_list args, buffer_t *output,
-		unsigned char flags, char wid, char prec, unsigned char len);
+		unsigned char flags, int wid, int prec, unsigned char len);
 unsigned int convert_X(va_list args, buffer_t *output,
-		unsigned char flags, char wid, char prec, unsigned char len);
+		unsigned char flags, int wid, int prec, unsigned char len);
 
 /**
  * convert_x - Converts an unsigned int argument to hex using abcdef
@@ -24,11 +24,11 @@ unsigned int convert_X(va_list args, buffer_t *output,
  * Return: The number of bytes stored to the buffer.
  */
 unsigned int convert_x(va_list args, buffer_t *output,
-		unsigned char flags, char wid, char prec, unsigned char len)
+		unsigned char flags, int wid, int prec, unsigned char len)
 {
 	unsigned long int num;
 	unsigned int ret = 0;
-	char *lead = "0x", space = ' ';
+	char *lead = "0x";
 
 	if (len == LONG)
 		num = va_arg(args, unsigned long int);
@@ -44,11 +44,7 @@ unsigned int convert_x(va_list args, buffer_t *output,
 		ret += convert_ubase(output, num, "0123456789abcdef",
 				flags, wid, prec);
 
-	if (NEG_FLAG == 1)
-	{
-		for (wid -= ret; wid > 0; wid--)
-			ret += _memcpy(output, &space, 1);
-	}
+	ret += print_neg_width(output, ret, flags, wid);
 
 	return (ret);
 }
@@ -66,11 +62,11 @@ unsigned int convert_x(va_list args, buffer_t *output,
  * Return: The number of bytes stored to the buffer.
  */
 unsigned int convert_X(va_list args, buffer_t *output,
-		unsigned char flags, char wid, char prec, unsigned char len)
+		unsigned char flags, int wid, int prec, unsigned char len)
 {
 	unsigned long int num;
 	unsigned int ret = 0;
-	char *lead = "0X", space = ' ';
+	char *lead = "0X";
 
 	if (len == LONG)
 		num = va_arg(args, unsigned long);
@@ -86,11 +82,7 @@ unsigned int convert_X(va_list args, buffer_t *output,
 		ret += convert_ubase(output, num, "0123456789ABCDEF",
 				flags, wid, prec);
 
-	if (NEG_FLAG == 1)
-	{
-		for (wid -= ret; wid > 0; wid--)
-			ret += _memcpy(output, &space, 1);
-	}
+	ret += print_neg_width(output, ret, flags, wid);
 
 	return (ret);
 }

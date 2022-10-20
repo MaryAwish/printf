@@ -7,13 +7,13 @@
 #include "main.h"
 
 unsigned int convert_s(va_list args, buffer_t *output,
-		unsigned char flags, char wid, char prec, unsigned char len);
+		unsigned char flags, int wid, int prec, unsigned char len);
 unsigned int convert_S(va_list args, buffer_t *output,
-		unsigned char flags, char wid, char prec, unsigned char len);
+		unsigned char flags, int wid, int prec, unsigned char len);
 unsigned int convert_r(va_list args, buffer_t *output,
-		unsigned char flags, char wid, char prec, unsigned char len);
+		unsigned char flags, int wid, int prec, unsigned char len);
 unsigned int convert_R(va_list args, buffer_t *output,
-		unsigned char flags, char wid, char prec, unsigned char len);
+		unsigned char flags, int wid, int prec, unsigned char len);
 
 /**
  * convert_s - Converts an argument to a string and
@@ -28,9 +28,9 @@ unsigned int convert_R(va_list args, buffer_t *output,
  * Return: The number of bytes stored to the buffer.
  */
 unsigned int convert_s(va_list args, buffer_t *output,
-		unsigned char flags, char wid, char prec, unsigned char len)
+		unsigned char flags, int wid, int prec, unsigned char len)
 {
-	char *str, *null = "(null)", width = ' ';
+	char *str, *null = "(null)";
 	int size;
 	unsigned int ret = 0;
 
@@ -44,13 +44,9 @@ unsigned int convert_s(va_list args, buffer_t *output,
 	for (size = 0; *(str + size);)
 		size++;
 
-	if (NEG_FLAG == 0)
-	{
-		for (wid -= (prec == -1) ? size : prec; wid > 0; wid--)
-			ret += _memcpy(output, &width, 1);
-	}
+	ret += print_string_width(output, flags, wid, prec, size);
 
-	prec = (prec == -1) ? (int)size : prec;
+	prec = (prec == -1) ? size : prec;
 	while (*str != '\0' && prec > 0)
 	{
 		ret += _memcpy(output, str, 1);
@@ -58,11 +54,7 @@ unsigned int convert_s(va_list args, buffer_t *output,
 		str++;
 	}
 
-	if (NEG_FLAG == 1)
-	{
-		for (wid -= ret; wid > 0; wid--)
-			ret += _memcpy(output, &width, 1);
-	}
+	ret += print_neg_width(output, ret, flags, wid);
 
 	return (ret);
 }
@@ -83,9 +75,9 @@ unsigned int convert_s(va_list args, buffer_t *output,
  *              are stored as \x followed by the ASCII code value in hex.
  */
 unsigned int convert_S(va_list args, buffer_t *output,
-		unsigned char flags, char wid, char prec, unsigned char len)
+		unsigned char flags, int wid, int prec, unsigned char len)
 {
-	char *str, *null = "(null)", *hex = "\\x", *zero = "0", width = ' ';
+	char *str, *null = "(null)", *hex = "\\x", zero = '0';
 	int size, index;
 	unsigned int ret = 0;
 
@@ -93,13 +85,12 @@ unsigned int convert_S(va_list args, buffer_t *output,
 	str = va_arg(args, char *);
 	if (str == NULL)
 		return (_memcpy(output, null, 6));
+
 	for (size = 0; str[size];)
 		size++;
-	if (NEG_FLAG == 0)
-	{
-		for (wid -= (prec == -1) ? size : prec; wid > 0; wid--)
-			ret += _memcpy(output, &width, 1);
-	}
+
+	ret += print_string_width(output, flags, wid, prec, size);
+
 	prec = (prec == -1) ? size : prec;
 	for (index = 0; *(str + index) != '\0' && index < prec; index++)
 	{
@@ -107,18 +98,16 @@ unsigned int convert_S(va_list args, buffer_t *output,
 		{
 			ret += _memcpy(output, hex, 2);
 			if (*(str + index) < 16)
-				ret += _memcpy(output, zero, 1);
+				ret += _memcpy(output, &zero, 1);
 			ret += convert_ubase(output, *(str + index),
 					     "0123456789ABCDEF", flags, 0, 0);
 			continue;
 		}
 		ret += _memcpy(output, (str + index), 1);
 	}
-	if (NEG_FLAG == 1)
-	{
-		for (wid -= ret; wid > 0; wid--)
-			ret += _memcpy(output, &width, 1);
-	}
+
+	ret += print_neg_width(output, ret, flags, wid);
+
 	return (ret);
 }
 
@@ -135,9 +124,9 @@ unsigned int convert_S(va_list args, buffer_t *output,
  * Return: The number of bytes stored to the buffer.
  */
 unsigned int convert_r(va_list args, buffer_t *output,
-		unsigned char flags, char wid, char prec, unsigned char len)
+		unsigned char flags, int wid, int prec, unsigned char len)
 {
-	char *str, *null = "(null)", width = ' ';
+	char *str, *null = "(null)";
 	int size, end, i;
 	unsigned int ret = 0;
 
@@ -151,25 +140,17 @@ unsigned int convert_r(va_list args, buffer_t *output,
 	for (size = 0; *(str + size);)
 		size++;
 
-	if (NEG_FLAG == 0)
-	{
-		for (wid -= (prec == -1) ? size : prec; wid > 0; wid--)
-			ret += _memcpy(output, &width, 1);
-	}
+	ret += print_string_width(output, flags, wid, prec, size);
 
 	end = size - 1;
-	prec = (prec == -1) ? (int)size : prec;
+	prec = (prec == -1) ? size : prec;
 	for (i = 0; end >= 0 && i < prec; i++)
 	{
 		ret += _memcpy(output, (str + end), 1);
 		end--;
 	}
 
-	if (NEG_FLAG == 1)
-	{
-		for (wid -= ret; wid > 0; wid--)
-			ret += _memcpy(output, &width, 1);
-	}
+	ret += print_neg_width(output, ret, flags, wid);
 
 	return (ret);
 }
@@ -187,11 +168,11 @@ unsigned int convert_r(va_list args, buffer_t *output,
  * Return: The number of bytes stored to the buffer.
  */
 unsigned int convert_R(va_list args, buffer_t *output,
-		unsigned char flags, char wid, char prec, unsigned char len)
+		unsigned char flags, int wid, int prec, unsigned char len)
 {
 	char *alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	char *rot13 = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
-	char *str, *null = "(null)", width = ' ';
+	char *str, *null = "(null)";
 	int i, j, size;
 	unsigned int ret = 0;
 
@@ -201,14 +182,13 @@ unsigned int convert_R(va_list args, buffer_t *output,
 	str = va_arg(args, char *);
 	if (str == NULL)
 		return (_memcpy(output, null, 6));
+
 	for (size = 0; *(str + size);)
 		size++;
-	if (NEG_FLAG == 0)
-	{
-		for (wid -= (prec == -1) ? size : prec; wid > 0; wid--)
-			ret += _memcpy(output, &width, 1);
-	}
-	prec = (prec == -1) ? (int)size : prec;
+
+	ret += print_string_width(output, flags, wid, prec, size);
+
+	prec = (prec == -1) ? size : prec;
 	for (i = 0; *(str + i) != '\0' && i < prec; i++)
 	{
 		for (j = 0; j < 52; j++)
@@ -222,11 +202,8 @@ unsigned int convert_R(va_list args, buffer_t *output,
 		if (j == 52)
 			ret += _memcpy(output, (str + i), 1);
 	}
-	if (NEG_FLAG == 1)
-	{
-		for (wid -= ret; wid > 0; wid--)
-			ret += _memcpy(output, &width, 1);
-	}
+
+	ret += print_neg_width(output, ret, flags, wid);
 
 	return (ret);
 }
