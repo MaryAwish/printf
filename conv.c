@@ -20,7 +20,6 @@ char *convert(unsigned long int num, int base, int lowercase)
 	ptr = &buff[49];
 
 	*ptr = '\0';
-
 	do {
 		*--ptr = rep[num % base];
 		num /= base;
