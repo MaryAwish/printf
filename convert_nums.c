@@ -1,7 +1,7 @@
 /*
  * File: convert_nums.c
  * Auth: Mary Ouma
- *       Jan Nelson 
+ * Auth: Jan Nelson
  */
 
 #include "main.h"
